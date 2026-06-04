@@ -41,6 +41,7 @@
 
     main {
       width: min(1360px, calc((100vw - 36px) / 1.1));
+      height: min(720px, calc((100vh - 36px) / 1.1));
       margin: 0;
       padding: 0;
     }
@@ -48,6 +49,7 @@
     .app {
       display: grid;
       grid-template-columns: minmax(280px, 0.72fr) minmax(700px, 1.65fr);
+      height: 100%;
       min-height: 0;
       transform: scale(1.1);
       transform-origin: center;
@@ -61,8 +63,8 @@
     .summary {
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
       gap: 18px;
+      min-height: 0;
       padding: 22px;
       background:
         linear-gradient(160deg, rgba(9, 107, 114, 0.12), transparent 42%),
@@ -72,7 +74,9 @@
 
     .title-block {
       display: grid;
+      align-content: start;
       gap: 8px;
+      min-height: 218px;
     }
 
     .eyebrow {
@@ -102,6 +106,7 @@
     .vehicle-photo {
       display: block;
       width: 100%;
+      flex: 0 0 auto;
       aspect-ratio: 16 / 9;
       object-fit: cover;
       object-position: center;
@@ -112,7 +117,10 @@
 
     .price-stack {
       display: grid;
+      align-content: end;
       gap: 8px;
+      margin-top: auto;
+      min-height: 154px;
     }
 
     .price-row {
@@ -156,13 +164,16 @@
       align-content: start;
       align-items: start;
       gap: 16px;
+      min-height: 0;
       padding: 22px;
     }
 
     .control-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
+      align-content: start;
       gap: 12px;
+      min-height: 0;
     }
 
     .field,
@@ -250,6 +261,19 @@
     select {
       padding: 0 12px;
       appearance: auto;
+    }
+
+    .rate-display {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 800;
     }
 
     input:focus,
@@ -378,6 +402,7 @@
 
     .results {
       display: grid;
+      align-content: start;
       gap: 12px;
       padding: 16px;
       background:
@@ -493,6 +518,7 @@
       }
 
       main {
+        height: auto;
         width: min(100% - 20px, 560px);
         margin: 0 auto;
         padding: 10px 0;
@@ -507,6 +533,7 @@
       }
 
       .app {
+        height: auto;
         min-height: 0;
         transform: none;
       }
@@ -515,6 +542,11 @@
         padding: 24px;
         border-right: 0;
         border-bottom: 1px solid var(--line);
+      }
+
+      .title-block,
+      .price-stack {
+        min-height: 0;
       }
 
       h1 {
@@ -651,9 +683,8 @@
 
           <div class="field">
             <div class="field-label">Fixed interest</div>
-            <div class="metric" aria-label="Annual interest rate">
-              <span>APR</span>
-              <strong id="interestRate">8.5%</strong>
+            <div class="rate-display" aria-label="Annual interest rate">
+              <span id="interestRate">8.5%</span>
             </div>
           </div>
 
