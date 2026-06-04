@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Volvo EX30 Payment Planner</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --surface-strong: #f0f4f5;
+      --ink: #17202a;
+      --muted: #5f6c76;
+      --line: #d9e0e5;
+      --accent: #096b72;
+      --accent-strong: #064f55;
+      --accent-soft: #dff1f2;
+      --warning: #a94f12;
+      --success: #236b46;
+      --shadow: 0 20px 60px rgba(31, 42, 55, 0.14);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px 12px;
+      background:
+        linear-gradient(135deg, rgba(9, 107, 114, 0.08), transparent 34%),
+        linear-gradient(315deg, rgba(169, 79, 18, 0.08), transparent 32%),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    main {
+      width: min(1360px, calc((100vw - 36px) / 1.1));
+      margin: 0;
+      padding: 0;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.72fr) minmax(700px, 1.65fr);
+      min-height: 0;
+      transform: scale(1.1);
+      transform-origin: center;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid rgba(23, 32, 42, 0.08);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .summary {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 22px;
+      background:
+        linear-gradient(160deg, rgba(9, 107, 114, 0.12), transparent 42%),
+        var(--surface-strong);
+      border-right: 1px solid var(--line);
+    }
+
+    .title-block {
+      display: grid;
+      gap: 8px;
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 13ch;
+      margin: 0;
+      font-size: clamp(1.85rem, 3vw, 3.25rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subhead {
+      max-width: 44ch;
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .vehicle-photo {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      object-position: center;
+      border: 1px solid rgba(23, 32, 42, 0.1);
+      border-radius: 8px;
+      background: var(--line);
+    }
+
+    .price-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 34px;
+      padding: 0 0 8px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .price-row strong {
+      color: var(--ink);
+      font-size: 1.02rem;
+      white-space: nowrap;
+    }
+
+    .price-row .discount {
+      color: var(--warning);
+    }
+
+    .price-row.total {
+      min-height: 44px;
+      padding-top: 2px;
+      border-bottom: 0;
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .price-row.total strong {
+      font-size: 1.42rem;
+      color: var(--accent-strong);
+    }
+
+    .details {
+      display: grid;
+      grid-template-columns: minmax(330px, 0.95fr) minmax(360px, 1.05fr);
+      align-content: start;
+      align-items: start;
+      gap: 16px;
+      padding: 22px;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field,
+    .results {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .field {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .field.wide {
+      grid-column: 1 / -1;
+    }
+
+    .vehicle-switch {
+      gap: 8px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-strong);
+    }
+
+    .segmented button {
+      min-height: 36px;
+      background: transparent;
+      border-color: transparent;
+    }
+
+    .segmented button.active {
+      border-color: var(--accent);
+      background: #fff;
+      color: var(--accent-strong);
+      box-shadow: 0 8px 20px rgba(31, 42, 55, 0.1);
+    }
+
+    label,
+    .field-label {
+      color: var(--ink);
+      font-size: 0.88rem;
+      font-weight: 750;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    input[type="number"],
+    select {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 700;
+      outline: none;
+    }
+
+    input[type="number"] {
+      max-width: 108px;
+      padding: 0 34px 0 12px;
+      text-align: right;
+    }
+
+    select {
+      padding: 0 12px;
+      appearance: auto;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(9, 107, 114, 0.13);
+    }
+
+    .number-wrap {
+      position: relative;
+      width: 108px;
+    }
+
+    .suffix {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-weight: 800;
+      pointer-events: none;
+    }
+
+    .quick-picks {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .downpayment-preview {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 44px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--accent-soft);
+    }
+
+    .downpayment-preview span {
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 750;
+    }
+
+    .downpayment-preview strong {
+      color: var(--accent-strong);
+      font-size: 1.08rem;
+      line-height: 1;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .checkbox-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .checkbox-row input {
+      width: 20px;
+      height: 20px;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    .checkbox-row strong {
+      color: var(--accent-strong);
+      font-size: 1.08rem;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .repayment-timing {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .month-wrap {
+      position: relative;
+      width: 116px;
+    }
+
+    .month-wrap input[type="number"] {
+      max-width: 116px;
+      padding-right: 42px;
+    }
+
+    .field-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    button {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    button.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .results {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      background:
+        linear-gradient(135deg, rgba(9, 107, 114, 0.1), transparent 45%),
+        #fbfcfc;
+    }
+
+    .payment {
+      display: grid;
+      gap: 4px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .payment span {
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .payment strong {
+      color: var(--accent-strong);
+      font-size: clamp(2.15rem, 4.6vw, 3.15rem);
+      line-height: 1;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      display: grid;
+      gap: 4px;
+      min-height: 68px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .metric strong {
+      align-self: end;
+      color: var(--ink);
+      font-size: 1.04rem;
+      overflow-wrap: anywhere;
+    }
+
+    .impact-panel {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .impact-title {
+      color: var(--ink);
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .impact-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .impact-item {
+      display: grid;
+      gap: 4px;
+      min-height: 56px;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--surface-strong);
+    }
+
+    .impact-item span {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .impact-item strong {
+      align-self: end;
+      color: var(--success);
+      font-size: 0.98rem;
+      overflow-wrap: anywhere;
+    }
+
+    .note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    @media (max-width: 960px) {
+      body {
+        display: block;
+        padding: 0;
+      }
+
+      main {
+        width: min(100% - 20px, 560px);
+        margin: 0 auto;
+        padding: 10px 0;
+      }
+
+      .app,
+      .details,
+      .control-grid,
+      .metric-grid,
+      .impact-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .app {
+        min-height: 0;
+        transform: none;
+      }
+
+      .summary {
+        padding: 24px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      h1 {
+        max-width: 12ch;
+      }
+
+      .details {
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 440px) {
+      body {
+        background: var(--bg);
+      }
+
+      main {
+        width: 100%;
+        padding: 0;
+      }
+
+      .app {
+        min-height: 100vh;
+        border: 0;
+        border-radius: 0;
+      }
+
+      .summary,
+      .details {
+        padding: 18px;
+      }
+
+      .quick-picks {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .segmented {
+        grid-template-columns: 1fr;
+      }
+
+      .price-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .checkbox-row {
+        grid-template-columns: auto 1fr;
+      }
+
+      .checkbox-row strong {
+        grid-column: 2;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="app" aria-labelledby="app-title">
+      <aside class="summary" aria-label="Vehicle price summary">
+        <div class="title-block">
+          <p class="eyebrow" id="rateEyebrow">8.5% APR calculator</p>
+          <h1 id="app-title">Volvo EX30 Payment Planner</h1>
+          <p class="subhead">Estimate the monthly payment for the discounted vehicle price using a percentage downpayment and a loan term up to 84 months.</p>
+        </div>
+
+        <img
+          class="vehicle-photo"
+          src="https://www.volvo-velmar.gr/wp-content/uploads/2023/11/Volvo_EX30_ext.jpg"
+          alt="Volvo EX30 exterior"
+          referrerpolicy="no-referrer"
+        >
+
+        <div class="price-stack">
+          <div class="price-row">
+            <span>Original price</span>
+            <strong id="originalPrice">40.200,00 &euro;</strong>
+          </div>
+          <div class="price-row">
+            <span>Dealership bonus offer</span>
+            <strong class="discount" id="bonusOffer">-2.900,00 &euro;</strong>
+          </div>
+          <div class="price-row total">
+            <span>Net vehicle price</span>
+            <strong id="netPrice">37.300,00 &euro;</strong>
+          </div>
+        </div>
+      </aside>
+
+      <section class="details" aria-label="Loan controls and results">
+        <div class="control-grid">
+          <div class="field wide vehicle-switch">
+            <div class="field-label">Vehicle</div>
+            <div class="segmented" role="group" aria-label="Choose vehicle">
+              <button type="button" class="active" data-vehicle="volvo">Volvo EX30</button>
+              <button type="button" data-vehicle="ford">Ford Puma Gen-E</button>
+            </div>
+          </div>
+
+          <div class="field wide">
+            <label for="downpaymentRange">Downpayment percentage</label>
+            <div class="input-row">
+              <input id="downpaymentRange" type="range" min="0" max="100" step="1" value="15">
+              <div class="number-wrap">
+                <input id="downpaymentPercent" type="number" min="0" max="100" step="1" value="15" inputmode="decimal" aria-label="Downpayment percentage">
+                <span class="suffix">%</span>
+              </div>
+            </div>
+            <div class="quick-picks" aria-label="Quick downpayment percentages">
+              <button type="button" data-downpayment="10">10%</button>
+              <button type="button" data-downpayment="15" class="active">15%</button>
+              <button type="button" data-downpayment="20">20%</button>
+              <button type="button" data-downpayment="25">25%</button>
+            </div>
+            <div class="downpayment-preview" aria-live="polite">
+              <span>Downpayment amount</span>
+              <strong id="downpaymentInline">0,00 &euro;</strong>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="loanDuration">Loan duration</label>
+            <select id="loanDuration">
+              <option value="12">12 months</option>
+              <option value="24">24 months</option>
+              <option value="36">36 months</option>
+              <option value="48">48 months</option>
+              <option value="60" selected>60 months</option>
+              <option value="72">72 months</option>
+              <option value="84">84 months</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="field-label">Fixed interest</div>
+            <div class="metric" aria-label="Annual interest rate">
+              <span>APR</span>
+              <strong id="interestRate">8.5%</strong>
+            </div>
+          </div>
+
+          <div class="field wide">
+            <label class="checkbox-row" for="principalRepaymentToggle">
+              <input id="principalRepaymentToggle" type="checkbox">
+              <span>Apply future principal repayment</span>
+              <strong>3.000,00 &euro;</strong>
+            </label>
+            <div class="repayment-timing">
+              <label for="repaymentMonth">Repayment after payment</label>
+              <div class="month-wrap">
+                <input id="repaymentMonth" type="number" min="1" max="83" step="1" value="12" inputmode="numeric">
+                <span class="suffix">mo</span>
+              </div>
+            </div>
+            <p class="field-note">Assumes the remaining payments are recalculated after this principal repayment.</p>
+          </div>
+        </div>
+
+        <div class="results" aria-live="polite">
+          <div class="payment">
+            <span>Estimated monthly payment</span>
+            <strong id="monthlyPayment">0,00 &euro;</strong>
+          </div>
+
+          <div class="metric-grid">
+            <div class="metric">
+              <span>Downpayment cash</span>
+              <strong id="downpaymentCash">0,00 &euro;</strong>
+            </div>
+            <div class="metric">
+              <span>Financed amount</span>
+              <strong id="loanAmount">0,00 &euro;</strong>
+            </div>
+            <div class="metric">
+              <span>Total interest</span>
+              <strong id="totalInterest">0,00 &euro;</strong>
+            </div>
+            <div class="metric">
+              <span>Total paid over term</span>
+              <strong id="totalPaid">0,00 &euro;</strong>
+            </div>
+          </div>
+
+          <div class="impact-panel">
+            <div class="impact-title">Impact of future principal repayment</div>
+            <div class="impact-grid">
+              <div class="impact-item">
+                <span>Principal repaid</span>
+                <strong id="principalImpact">0,00 &euro;</strong>
+              </div>
+              <div class="impact-item">
+                <span>Payment after repayment</span>
+                <strong id="monthlyImpact">0,00 &euro;</strong>
+              </div>
+              <div class="impact-item">
+                <span>Total interest saved</span>
+                <strong id="interestImpact">0,00 &euro;</strong>
+              </div>
+              <div class="impact-item">
+                <span>Total paid saved</span>
+                <strong id="totalPaidImpact">0,00 &euro;</strong>
+              </div>
+            </div>
+          </div>
+
+          <p class="note">Estimate only. Taxes, fees, insurance, and lender-specific terms are not included.</p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const vehicles = {
+      volvo: {
+        title: "Volvo EX30 Payment Planner",
+        name: "Volvo EX30",
+        image: "https://www.volvo-velmar.gr/wp-content/uploads/2023/11/Volvo_EX30_ext.jpg",
+        imageAlt: "Volvo EX30 exterior",
+        originalPrice: 40200,
+        bonusOffer: 2900,
+        annualInterestRate: 0.085
+      },
+      ford: {
+        title: "Ford Puma Gen-E Payment Planner",
+        name: "Ford Puma Gen-E",
+        image: "https://www.ford.gr/content/dam/guxeu/global-shared/vehicle-images/puma-gen-e/ford-puma_gen_e-eu-16x9-768x432-showroom-heroimage.png.renditions.small.png",
+        imageAlt: "Ford Puma Gen-E exterior",
+        originalPrice: 30000,
+        bonusOffer: 0,
+        annualInterestRate: 0.056
+      }
+    };
+
+    const extraPrincipalAmount = 3000;
+    let selectedVehicleKey = "volvo";
+
+    const currency = new Intl.NumberFormat("el-GR", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    const elements = {
+      appTitle: document.getElementById("app-title"),
+      rateEyebrow: document.getElementById("rateEyebrow"),
+      vehiclePhoto: document.querySelector(".vehicle-photo"),
+      originalPrice: document.getElementById("originalPrice"),
+      bonusOffer: document.getElementById("bonusOffer"),
+      netPrice: document.getElementById("netPrice"),
+      downpaymentRange: document.getElementById("downpaymentRange"),
+      downpaymentPercent: document.getElementById("downpaymentPercent"),
+      loanDuration: document.getElementById("loanDuration"),
+      principalRepaymentToggle: document.getElementById("principalRepaymentToggle"),
+      repaymentMonth: document.getElementById("repaymentMonth"),
+      monthlyPayment: document.getElementById("monthlyPayment"),
+      downpaymentInline: document.getElementById("downpaymentInline"),
+      downpaymentCash: document.getElementById("downpaymentCash"),
+      loanAmount: document.getElementById("loanAmount"),
+      totalInterest: document.getElementById("totalInterest"),
+      totalPaid: document.getElementById("totalPaid"),
+      principalImpact: document.getElementById("principalImpact"),
+      monthlyImpact: document.getElementById("monthlyImpact"),
+      interestImpact: document.getElementById("interestImpact"),
+      totalPaidImpact: document.getElementById("totalPaidImpact"),
+      interestRate: document.getElementById("interestRate"),
+      vehicleButtons: Array.from(document.querySelectorAll("[data-vehicle]")),
+      quickPicks: Array.from(document.querySelectorAll("[data-downpayment]"))
+    };
+
+    function clampPercentage(value) {
+      const parsed = Number.parseFloat(value);
+      if (!Number.isFinite(parsed)) return 0;
+      return Math.min(100, Math.max(0, parsed));
+    }
+
+    function formatPercent(value) {
+      return `${(value * 100).toLocaleString("el-GR", {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1
+      })}%`;
+    }
+
+    function calculateMonthlyPayment(principal, months, annualInterestRate) {
+      if (principal <= 0 || months <= 0) return 0;
+
+      const monthlyRate = annualInterestRate / 12;
+      const compound = Math.pow(1 + monthlyRate, months);
+
+      return principal * ((monthlyRate * compound) / (compound - 1));
+    }
+
+    function calculateScenario(principal, months, annualInterestRate) {
+      const monthlyPayment = calculateMonthlyPayment(principal, months, annualInterestRate);
+      const totalLoanPayments = monthlyPayment * months;
+      const totalInterest = Math.max(0, totalLoanPayments - principal);
+
+      return {
+        monthlyPayment,
+        totalLoanPayments,
+        totalInterest
+      };
+    }
+
+    function clampRepaymentMonth(value, months) {
+      const parsed = Number.parseInt(value, 10);
+      const maxMonth = Math.max(1, months - 1);
+      if (!Number.isFinite(parsed)) return Math.min(12, maxMonth);
+      return Math.min(maxMonth, Math.max(1, parsed));
+    }
+
+    function calculatePrincipalRepaymentScenario(principal, months, repaymentMonth, repaymentAmount, annualInterestRate) {
+      const monthlyRate = annualInterestRate / 12;
+      const baseMonthlyPayment = calculateMonthlyPayment(principal, months, annualInterestRate);
+      const appliedMonth = clampRepaymentMonth(repaymentMonth, months);
+      let balance = principal;
+      let paymentsBeforeRepayment = 0;
+
+      for (let month = 0; month < appliedMonth && balance > 0; month += 1) {
+        const interest = balance * monthlyRate;
+        const payment = Math.min(baseMonthlyPayment, balance + interest);
+        balance = Math.max(0, balance + interest - payment);
+        paymentsBeforeRepayment += payment;
+      }
+
+      const repaymentApplied = Math.min(repaymentAmount, balance);
+      balance = Math.max(0, balance - repaymentApplied);
+
+      const remainingMonths = Math.max(0, months - appliedMonth);
+      const monthlyAfterRepayment = calculateMonthlyPayment(balance, remainingMonths, annualInterestRate);
+      const paymentsAfterRepayment = monthlyAfterRepayment * remainingMonths;
+      const totalLoanPayments = paymentsBeforeRepayment + repaymentApplied + paymentsAfterRepayment;
+
+      return {
+        monthlyPayment: baseMonthlyPayment,
+        monthlyAfterRepayment,
+        repaymentApplied,
+        totalLoanPayments,
+        totalInterest: Math.max(0, totalLoanPayments - principal)
+      };
+    }
+
+    function updateActiveQuickPick(percent) {
+      elements.quickPicks.forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.downpayment) === percent);
+      });
+    }
+
+    function updateActiveVehicleButton(vehicleKey) {
+      elements.vehicleButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.vehicle === vehicleKey);
+      });
+    }
+
+    function calculate() {
+      const vehicle = vehicles[selectedVehicleKey];
+      const originalPrice = vehicle.originalPrice;
+      const bonusOffer = vehicle.bonusOffer;
+      const annualInterestRate = vehicle.annualInterestRate;
+      const netPrice = originalPrice - bonusOffer;
+      const percent = clampPercentage(elements.downpaymentPercent.value);
+      const months = Number.parseInt(elements.loanDuration.value, 10);
+      const repaymentMonth = clampRepaymentMonth(elements.repaymentMonth.value, months);
+      const downpaymentCash = netPrice * (percent / 100);
+      const basePrincipal = netPrice - downpaymentCash;
+      const baseScenario = calculateScenario(basePrincipal, months, annualInterestRate);
+      const hasPrincipalRepayment = elements.principalRepaymentToggle.checked;
+      const selectedScenario = hasPrincipalRepayment
+        ? calculatePrincipalRepaymentScenario(basePrincipal, months, repaymentMonth, extraPrincipalAmount, annualInterestRate)
+        : baseScenario;
+      const totalPaid = downpaymentCash + selectedScenario.totalLoanPayments;
+      const baseTotalPaid = downpaymentCash + baseScenario.totalLoanPayments;
+
+      document.title = vehicle.title;
+      elements.appTitle.textContent = vehicle.title;
+      elements.rateEyebrow.textContent = `${formatPercent(annualInterestRate)} APR calculator`;
+      elements.vehiclePhoto.src = vehicle.image;
+      elements.vehiclePhoto.alt = vehicle.imageAlt;
+      elements.downpaymentPercent.value = String(percent);
+      elements.downpaymentRange.value = String(percent);
+      elements.repaymentMonth.max = String(Math.max(1, months - 1));
+      elements.repaymentMonth.value = String(repaymentMonth);
+      elements.repaymentMonth.disabled = !hasPrincipalRepayment;
+      elements.originalPrice.textContent = currency.format(originalPrice);
+      elements.bonusOffer.textContent = bonusOffer > 0 ? "-" + currency.format(bonusOffer) : currency.format(0);
+      elements.netPrice.textContent = currency.format(netPrice);
+      elements.interestRate.textContent = formatPercent(annualInterestRate);
+      elements.monthlyPayment.textContent = currency.format(selectedScenario.monthlyPayment);
+      elements.downpaymentInline.textContent = currency.format(downpaymentCash);
+      elements.downpaymentCash.textContent = currency.format(downpaymentCash);
+      elements.loanAmount.textContent = currency.format(basePrincipal);
+      elements.totalInterest.textContent = currency.format(selectedScenario.totalInterest);
+      elements.totalPaid.textContent = currency.format(totalPaid);
+      elements.principalImpact.textContent = currency.format(hasPrincipalRepayment ? selectedScenario.repaymentApplied : 0);
+      elements.monthlyImpact.textContent = currency.format(hasPrincipalRepayment ? selectedScenario.monthlyAfterRepayment : 0);
+      elements.interestImpact.textContent = currency.format(hasPrincipalRepayment ? baseScenario.totalInterest - selectedScenario.totalInterest : 0);
+      elements.totalPaidImpact.textContent = currency.format(hasPrincipalRepayment ? baseTotalPaid - totalPaid : 0);
+      updateActiveQuickPick(percent);
+      updateActiveVehicleButton(selectedVehicleKey);
+    }
+
+    elements.downpaymentRange.addEventListener("input", (event) => {
+      elements.downpaymentPercent.value = event.target.value;
+      calculate();
+    });
+
+    elements.downpaymentPercent.addEventListener("input", calculate);
+    elements.downpaymentPercent.addEventListener("blur", calculate);
+    elements.loanDuration.addEventListener("change", calculate);
+    elements.principalRepaymentToggle.addEventListener("change", calculate);
+    elements.repaymentMonth.addEventListener("input", calculate);
+    elements.repaymentMonth.addEventListener("blur", calculate);
+
+    elements.vehicleButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedVehicleKey = button.dataset.vehicle;
+        calculate();
+      });
+    });
+
+    elements.quickPicks.forEach((button) => {
+      button.addEventListener("click", () => {
+        elements.downpaymentPercent.value = button.dataset.downpayment;
+        calculate();
+      });
+    });
+
+    calculate();
+  </script>
+</body>
+</html>
